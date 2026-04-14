@@ -6,108 +6,63 @@
 <title>لوحة الآراء</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap');
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --gold: #c9a84c;
-    --deep: #0d1b2a;
-    --mid: #1a2f45;
-    --light: #e8dfc8;
-  }
+  :root { --gold: #c9a84c; --deep: #0d1b2a; --mid: #1a2f45; --light: #e8dfc8; }
 
   body {
     font-family: 'Tajawal', sans-serif;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
     background: radial-gradient(ellipse at bottom, #0d1b2a 0%, #020509 100%);
   }
-
   body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
+    content: ""; position: fixed; inset: 0;
     background: transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat;
-    opacity: 0.4;
-    z-index: 0;
+    opacity: 0.4; z-index: 0;
   }
-
   body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
+    content: ""; position: fixed; inset: 0;
     background: radial-gradient(white 1px, transparent 1px);
     background-size: 40px 40px;
     animation: starsMove 60s linear infinite;
-    opacity: 0.15;
-    z-index: 0;
+    opacity: 0.15; z-index: 0;
   }
-
   @keyframes starsMove {
     from { transform: translateY(0); }
     to { transform: translateY(-1000px); }
   }
 
   .header {
-    position: relative;
-    z-index: 5;
-    text-align: center;
-    padding: 40px 20px 14px;
-    flex-shrink: 0;
+    position: relative; z-index: 5;
+    text-align: center; padding: 40px 20px 14px; flex-shrink: 0;
   }
-
   .title-main {
-    font-size: clamp(22px, 4vw, 36px);
-    font-weight: 900;
-    color: var(--gold);
-    letter-spacing: 1px;
+    font-size: clamp(22px, 4vw, 36px); font-weight: 900;
+    color: var(--gold); letter-spacing: 1px;
     text-shadow: 0 0 30px rgba(201,168,76,0.3);
-    line-height: 1.3;
   }
-
   .divider {
-    width: 60px;
-    height: 2px;
+    width: 60px; height: 2px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 10px auto 0;
-    border-radius: 2px;
+    margin: 10px auto 0; border-radius: 2px;
   }
 
-  #stage {
-    flex: 1;
-    position: relative;
-    z-index: 2;
-    overflow: hidden;
-    padding: 10px;
-  }
+  #stage { flex: 1; position: relative; z-index: 2; overflow: hidden; padding: 10px; }
 
   .empty-state {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: rgba(232,223,200,0.2);
-    pointer-events: none;
-    transition: opacity 0.5s;
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: rgba(232,223,200,0.2); pointer-events: none; transition: opacity 0.5s;
   }
   .empty-state.hidden { opacity: 0; }
-
   .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
   .empty-text { font-size: 15px; font-weight: 300; letter-spacing: 1px; }
 
   .logo {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 80px;
-    z-index: 10;
-    background: #ffffff;
-    padding: 10px;
+    position: fixed; top: 20px; right: 20px;
+    width: 80px; z-index: 10;
+    background: #ffffff; padding: 10px;
     border-radius: 40%;
     border: 2px solid rgba(201,168,76,0.5);
     box-shadow: 0 6px 20px rgba(0,0,0,0.4);
@@ -115,188 +70,110 @@
   }
 
   .vision-card {
-    position: absolute;
-    border-radius: 10px;
+    position: absolute; border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     border: 1.5px solid rgba(201,168,76,0.2);
-    cursor: default;
     transform-origin: center center;
     background: var(--mid);
   }
-
   .vision-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
+    width: 100%; height: 100%;
+    object-fit: contain; display: block;
     background: #f5f0e8;
   }
-
   .vision-card .card-num {
-    position: absolute;
-    top: 6px;
-    right: 8px;
+    position: absolute; top: 6px; right: 8px;
     background: rgba(201,168,76,0.9);
-    color: var(--deep);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 20px;
+    color: var(--deep); font-size: 11px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px;
   }
-
-  .vision-card .card-new {
-    position: absolute;
-    top: 6px;
-    left: 8px;
-    background: rgba(76, 175, 80, 0.9);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 20px;
+  .card-new {
+    position: absolute; top: 6px; left: 8px;
+    background: rgba(76,175,80,0.9);
+    color: #fff; font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 20px;
     animation: fadeOutBadge 3s forwards;
   }
+  @keyframes fadeOutBadge { 0%,70% { opacity: 1; } 100% { opacity: 0; } }
 
-  @keyframes fadeOutBadge {
-    0%   { opacity: 1; }
-    70%  { opacity: 1; }
-    100% { opacity: 0; }
+  .vision-card:hover .card-download { opacity: 1; }
+  .card-download {
+    position: absolute; bottom: 6px; left: 8px;
+    opacity: 0; transition: opacity 0.2s;
+    background: rgba(13,27,42,0.85);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 6px; padding: 3px 8px;
+    font-size: 11px; color: var(--gold);
+    cursor: pointer; font-family: 'Tajawal', sans-serif; z-index: 5;
   }
+
+  /* شريط الحالة العلوي */
+  #top-bar {
+    position: fixed; top: 14px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(13,27,42,0.9);
+    border: 1.5px solid rgba(201,168,76,0.25);
+    border-radius: 30px; padding: 7px 20px;
+    backdrop-filter: blur(8px);
+  }
+  #poll-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #555; transition: background 0.3s;
+  }
+  #poll-dot.live { background: #4caf50; box-shadow: 0 0 8px #4caf5088; }
+  #poll-dot.error { background: #f44336; }
+  #poll-label { font-size: 13px; color: rgba(201,168,76,0.8); white-space: nowrap; }
+
+  /* إشعار صورة جديدة */
+  #new-notif {
+    position: fixed; top: 60px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    background: rgba(76,175,80,0.15);
+    border: 1.5px solid rgba(76,175,80,0.5);
+    border-radius: 20px; padding: 6px 18px;
+    font-size: 13px; color: #81c784;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s;
+    white-space: nowrap;
+  }
+  #new-notif.show { opacity: 1; }
 
   .btn-fs {
-    position: fixed;
-    bottom: 18px;
-    left: 18px;
-    z-index: 20;
+    position: fixed; bottom: 18px; left: 18px; z-index: 20;
     background: rgba(26,47,69,0.9);
     border: 1.5px solid rgba(201,168,76,0.3);
-    border-radius: 8px;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    backdrop-filter: blur(4px);
-  }
-  .btn-fs:hover {
-    background: rgba(201,168,76,0.15);
-    border-color: rgba(201,168,76,0.6);
+    border-radius: 8px; width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; backdrop-filter: blur(4px);
   }
   .btn-fs svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; }
 
   #conn-status {
-    position: fixed;
-    bottom: 18px;
-    right: 18px;
-    z-index: 20;
-    font-size: 12px;
-    color: rgba(201,168,76,0.5);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  #conn-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #555;
-    transition: background 0.3s;
-  }
-  #conn-dot.live { background: #4caf50; box-shadow: 0 0 6px #4caf5088; }
-  #conn-dot.error { background: #f44336; }
-
-  /* شريط التنزيل التلقائي */
-  #auto-dl-bar {
-    position: fixed;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 30;
-    background: rgba(13,27,42,0.95);
-    border: 1.5px solid rgba(76,175,80,0.6);
-    border-radius: 30px;
-    padding: 8px 22px;
-    font-size: 14px;
-    color: #81c784;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s;
-    backdrop-filter: blur(8px);
-    white-space: nowrap;
-  }
-  #auto-dl-bar.show { opacity: 1; }
-  #auto-dl-bar .dl-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #4caf50;
-    box-shadow: 0 0 8px #4caf50;
-  }
-
-  /* زر التنزيل التلقائي */
-  #auto-dl-toggle {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 30;
-    background: rgba(26,47,69,0.9);
-    border: 1.5px solid rgba(201,168,76,0.3);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-family: 'Tajawal', sans-serif;
-    font-size: 13px;
-    color: var(--gold);
-    cursor: pointer;
-    transition: all 0.2s;
-    backdrop-filter: blur(4px);
-  }
-  #auto-dl-toggle:hover {
-    border-color: rgba(201,168,76,0.7);
-    background: rgba(201,168,76,0.1);
-  }
-  #auto-dl-toggle.active {
-    background: rgba(76,175,80,0.15);
-    border-color: rgba(76,175,80,0.6);
-    color: #81c784;
+    position: fixed; bottom: 18px; right: 18px; z-index: 20;
+    font-size: 12px; color: rgba(201,168,76,0.5);
+    display: flex; align-items: center; gap: 6px;
   }
 
   @keyframes cardEnter {
     from { opacity: 0; transform: scale(0.5) rotate(-5deg); }
     to { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
   }
-
   @keyframes zoomPulse {
-    0%   { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-    40%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
-    70%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
-    100% { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 3; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-  }
-
-  .vision-card:hover .card-download { opacity: 1; }
-  .card-download {
-    position: absolute;
-    bottom: 6px;
-    left: 8px;
-    opacity: 0;
-    transition: opacity 0.2s;
-    background: rgba(13,27,42,0.85);
-    border: 1px solid rgba(201,168,76,0.4);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 11px;
-    color: var(--gold);
-    cursor: pointer;
-    font-family: 'Tajawal', sans-serif;
-    z-index: 5;
+    0%   { transform: scale(1) rotate(var(--rot,0deg)); z-index:10; }
+    40%  { transform: scale(2.2) rotate(var(--rot,0deg)); z-index:10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
+    70%  { transform: scale(2.2) rotate(var(--rot,0deg)); z-index:10; }
+    100% { transform: scale(1) rotate(var(--rot,0deg)); z-index:3; }
   }
 </style>
 </head>
 <body>
+
 <img src="logo.png" class="logo" alt="شعار">
+
 <div class="header">
   <div class="title-main">رؤية تتحقق بخطوات واثقة</div>
   <div class="divider"></div>
@@ -309,291 +186,260 @@
   </div>
 </div>
 
-<!-- زر تفعيل/إيقاف التنزيل التلقائي -->
-<button id="auto-dl-toggle" onclick="toggleAutoDl()">⬇ تنزيل تلقائي: إيقاف</button>
+<!-- شريط الحالة -->
+<div id="top-bar">
+  <div id="poll-dot"></div>
+  <span id="poll-label">جاري التحميل...</span>
+</div>
 
-<button class="btn-fs" onclick="toggleFS()" title="تكبير الشاشة">
+<!-- إشعار صورة جديدة -->
+<div id="new-notif">✦ وصلت رسمة جديدة!</div>
+
+<button class="btn-fs" onclick="toggleFS()">
   <svg id="fs-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
   </svg>
 </button>
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, get, onChildAdded, query, orderByKey } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBOAMlq9lmExCuTpYu0OKlp7ZDC3LtOFVk",
-    authDomain: "alburhan-680f4.firebaseapp.com",
-    databaseURL: "https://alburhan-680f4-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "alburhan-680f4",
-    storageBucket: "alburhan-680f4.firebasestorage.app",
-    messagingSenderId: "662754849270",
-    appId: "1:662754849270:web:cbd3d76bb10994379ad7d7"
-  };
-
-  const connDot = document.getElementById('conn-dot');
-  const connLabel = document.getElementById('conn-label');
-
-  try {
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const galleryRef = ref(db, 'gallery_entries');
-
-    connDot.classList.add('live');
-    connLabel.textContent = 'متصل — جاري التحميل...';
-
-    // الخطوة 1: اجلب الصور الموجودة أولاً بـ get() — هذي قديمة، ما تتنزل تلقائياً
-    const existingSnap = await get(galleryRef);
-    const existingKeys = new Set();
-
-    if (existingSnap.exists()) {
-      existingSnap.forEach((child) => {
-        existingKeys.add(child.key);
-        const entry = child.val();
-        if (entry && entry.image) {
-          window._addCard(entry, false); // false = مش جديدة
-        }
-      });
-    }
-
-    const count = existingKeys.size;
-    connLabel.textContent = `متصل • ${count} رسمة موجودة — في انتظار الجديدة`;
-
-    // الخطوة 2: استمع للإضافات الجديدة فقط (اللي مفتاحها مش في existingKeys)
-    onChildAdded(galleryRef, (snapshot) => {
-      if (existingKeys.has(snapshot.key)) return; // تجاهل القديمة
-
-      const entry = snapshot.val();
-      if (entry && entry.image) {
-        window._addCard(entry, true); // true = جديدة
-        const total = document.querySelectorAll('.vision-card').length;
-        connLabel.textContent = `متصل • ${total} رسمة`;
-        window._autoDownload(entry, total);
-      }
-    });
-
-  } catch(e) {
-    console.error('Firebase error:', e);
-    connDot.classList.add('error');
-    connLabel.textContent = 'خطأ في الاتصال';
-  }
-</script>
+<div id="conn-status">
+  <span id="conn-label">يتحقق كل 5 ثواني</span>
+</div>
 
 <script>
+  // ======================================================
+  // 🔧 ضعي الـ Token الجديد هنا فقط
+  // ======================================================
+  const GITHUB_TOKEN  = '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';
+  const GITHUB_OWNER  = 'itsHamida';
+  const GITHUB_REPO   = 'alburhan';
+  const GITHUB_FOLDER = 'drawings';
+  const POLL_INTERVAL = 3000; // كل 5 ثواني
+  // ======================================================
+
   let galleryEntries = [];
   let cardElements = [];
   let zoomInterval = null;
   let currentZoomIndex = 0;
-  let autoDlEnabled = false; // إيقاف بالافتراضي — المستخدم يفعّله
+  let knownFiles = new Set(); // ملفات نعرفها مسبقاً
+  let isFirstLoad = true;
 
-  // تفعيل/إيقاف التنزيل التلقائي
-  window.toggleAutoDl = function() {
-    autoDlEnabled = !autoDlEnabled;
-    const btn = document.getElementById('auto-dl-toggle');
-    if (autoDlEnabled) {
-      btn.textContent = '⬇ تنزيل تلقائي: تشغيل';
-      btn.classList.add('active');
-    } else {
-      btn.textContent = '⬇ تنزيل تلقائي: إيقاف';
-      btn.classList.remove('active');
+  const pollDot   = document.getElementById('poll-dot');
+  const pollLabel = document.getElementById('poll-label');
+  const newNotif  = document.getElementById('new-notif');
+
+  // جلب قائمة الملفات من GitHub
+  async function fetchDrawings() {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FOLDER}`,
+        {
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Cache-Control': 'no-cache'
+          }
+        }
+      );
+
+      if (res.status === 404) {
+        // المجلد مش موجود بعد — طبيعي قبل أول رسمة
+        pollDot.classList.add('live');
+        isFirstLoad = false;
+        return;
+      }
+
+      if (!res.ok) throw new Error('GitHub API error: ' + res.status);
+
+      const files = await res.json();
+      pollDot.classList.add('live');
+
+      // رتّب الملفات من الأقدم للأحدث
+      const jpgFiles = files
+        .filter(f => f.name.endsWith('.jpg') || f.name.endsWith('.png'))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      let newCount = 0;
+
+      for (const file of jpgFiles) {
+        if (knownFiles.has(file.sha)) continue;
+        knownFiles.add(file.sha);
+
+        // جلب محتوى الصورة
+        const imgRes = await fetch(file.download_url, {
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        const blob = await imgRes.blob();
+        const dataURL = await blobToDataURL(blob);
+
+        const isNew = !isFirstLoad;
+        addCard({ image: dataURL, name: file.name }, isNew);
+
+        // تنزيل تلقائي للصور الجديدة فقط
+        if (isNew) {
+          newCount++;
+          autoDownload(dataURL, file.name);
+        }
+      }
+      isFirstLoad = false;
+
+    } catch(err) {
+      console.error('Poll error:', err);
     }
-  };
+  }
 
-  // تنزيل تلقائي عند وصول صورة جديدة
-  window._autoDownload = function(entry, num) {
-    if (!autoDlEnabled) return;
+  function blobToDataURL(blob) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  }
 
-    const bar = document.getElementById('auto-dl-bar');
-    const msg = document.getElementById('auto-dl-msg');
-    msg.textContent = `⬇ جاري تنزيل الصورة رقم ${num}...`;
-    bar.classList.add('show');
-
-    // تأخير بسيط لضمان وصول البيانات كاملة
+  function autoDownload(dataURL, filename) {
     setTimeout(() => {
       const link = document.createElement('a');
-      link.download = `opinion_${num}_${Date.now()}.jpg`;
-      link.href = entry.image;
+      link.download = filename;
+      link.href = dataURL;
       link.click();
+    }, 800);
+  }
 
-      msg.textContent = `✓ تم تنزيل الصورة رقم ${num}`;
-      setTimeout(() => bar.classList.remove('show'), 2500);
-    }, 500);
-  };
+
+  // ── Layout ──────────────────────────────────────────
 
   function getStageRect() {
-    const stage = document.getElementById('stage');
-    return { w: stage.offsetWidth, h: stage.offsetHeight };
+    const s = document.getElementById('stage');
+    return { w: s.offsetWidth, h: s.offsetHeight };
   }
 
   function getCardSizeRange(n) {
     let maxW, maxH, minW, minH;
-    if (n <= 30) {
-      maxW = 240; maxH = 180; minW = 120; minH = 90;
-    } else if (n <= 70) {
-      maxW = 180; maxH = 135; minW = 100; minH = 75;
-    } else {
-      maxW = 140; maxH = 105; minW = 80; minH = 60;
-    }
+    if (n <= 30)      { maxW=240; maxH=180; minW=120; minH=90; }
+    else if (n <= 70) { maxW=180; maxH=135; minW=100; minH=75; }
+    else              { maxW=140; maxH=105; minW=80;  minH=60; }
     const { w, h } = getStageRect();
-    maxW = Math.min(maxW, w * 0.35);
-    maxH = Math.min(maxH, h * 0.35);
-    minW = Math.min(minW, w * 0.12);
-    minH = Math.min(minH, h * 0.12);
-    return { minW, maxW, minH, maxH };
+    return {
+      minW: Math.min(minW, w*0.12), maxW: Math.min(maxW, w*0.35),
+      minH: Math.min(minH, h*0.12), maxH: Math.min(maxH, h*0.35)
+    };
   }
 
   function computeLayout(n) {
     const { w, h } = getStageRect();
-    const padding = 15;
-    const topSafeZone = Math.max(80, h * 0.18);
+    const pad = 15, topSafe = Math.max(80, h*0.18);
     if (n === 0) return [];
     if (n === 1) {
       const { maxW, maxH } = getCardSizeRange(1);
-      const cw = Math.min(w * 0.5, maxW);
-      const ch = Math.min(h * 0.5, maxH);
-      let x = Math.min(w - cw - padding, Math.max(padding, (w - cw) / 2));
-      let y = Math.min(h - ch - padding, Math.max(topSafeZone, (h - ch) / 2 + topSafeZone / 2));
-      return [{ x, y, w: cw, h: ch, rot: 0 }];
+      const cw = Math.min(w*0.5, maxW), ch = Math.min(h*0.5, maxH);
+      return [{ x:(w-cw)/2, y:(h-ch)/2+topSafe/2, w:cw, h:ch, rot:0 }];
     }
     const { minW, maxW, minH, maxH } = getCardSizeRange(n);
     const layouts = [];
-    const maxAttempts = n * 150;
     let attempts = 0;
-
-    while (layouts.length < n && attempts < maxAttempts) {
+    while (layouts.length < n && attempts < n*150) {
       attempts++;
-      const cw = minW + Math.random() * (maxW - minW);
-      const ch = minH + Math.random() * (maxH - minH);
-      const rot = (Math.random() - 0.5) * 8;
+      const cw = minW + Math.random()*(maxW-minW);
+      const ch = minH + Math.random()*(maxH-minH);
+      const rot = (Math.random()-0.5)*8;
       const zone = Math.random();
-      const minX = padding, maxX = w - cw - padding;
-      const minY = topSafeZone, maxY = h - ch - padding;
       let x, y;
-      if (zone < 0.33) {
-        x = minX + Math.random() * (Math.min(maxX, w * 0.3) - minX);
-      } else if (zone < 0.66) {
-        x = Math.max(minX, Math.min(maxX, w * 0.35 + Math.random() * (w * 0.3)));
-      } else {
-        x = Math.max(minX, w * 0.7) + Math.random() * (maxX - Math.max(minX, w * 0.7));
-      }
+      const minX=pad, maxX=w-cw-pad, minY=topSafe, maxY=h-ch-pad;
+      if (zone < 0.33)      x = minX + Math.random()*(Math.min(maxX, w*0.3)-minX);
+      else if (zone < 0.66) x = Math.max(minX, Math.min(maxX, w*0.35+Math.random()*w*0.3));
+      else                  x = Math.max(minX, w*0.7) + Math.random()*(maxX-Math.max(minX, w*0.7));
       x = Math.min(maxX, Math.max(minX, x));
-      y = Math.min(maxY, Math.max(minY, minY + Math.random() * (maxY - minY)));
-
+      y = Math.min(maxY, Math.max(minY, minY+Math.random()*(maxY-minY)));
       let overlap = false;
       for (const l of layouts) {
-        const ix = Math.max(x, l.x), iy = Math.max(y, l.y);
-        const iw = Math.min(x + cw, l.x + l.w) - ix;
-        const ih = Math.min(y + ch, l.y + l.h) - iy;
-        if (iw > 0 && ih > 0 && (iw * ih) / (cw * ch) > 0.02) {
-          overlap = true; break;
-        }
+        const iw = Math.min(x+cw, l.x+l.w) - Math.max(x, l.x);
+        const ih = Math.min(y+ch, l.y+l.h) - Math.max(y, l.y);
+        if (iw>0 && ih>0 && (iw*ih)/(cw*ch) > 0.02) { overlap=true; break; }
       }
-      if (!overlap) layouts.push({ x, y, w: cw, h: ch, rot });
+      if (!overlap) layouts.push({ x, y, w:cw, h:ch, rot });
     }
-
     while (layouts.length < n) {
-      const cw = minW + Math.random() * (maxW - minW);
-      const ch = minH + Math.random() * (maxH - minH);
-      const rot = (Math.random() - 0.5) * 8;
-      let x = Math.min(w - cw - padding, Math.max(padding, padding + Math.random() * (w - cw - 2 * padding)));
-      let y = Math.min(h - ch - padding, Math.max(topSafeZone, topSafeZone + Math.random() * (h - ch - topSafeZone)));
-      layouts.push({ x, y, w: cw, h: ch, rot });
+      const cw = minW+Math.random()*(maxW-minW), ch = minH+Math.random()*(maxH-minH);
+      layouts.push({
+        x: pad+Math.random()*(w-cw-2*pad),
+        y: topSafe+Math.random()*(h-ch-topSafe),
+        w:cw, h:ch, rot:(Math.random()-0.5)*8
+      });
     }
     return layouts;
   }
 
-  function applyLayoutToAll(animateLast = false) {
-    if (galleryEntries.length === 0) return;
+  function applyLayoutToAll(animateLast=false) {
+    if (!galleryEntries.length) return;
     const layouts = computeLayout(galleryEntries.length);
-    for (let i = 0; i < cardElements.length; i++) {
-      const el = cardElements[i];
-      const l = layouts[i];
-      if (!el || !l) continue;
+    cardElements.forEach((el, i) => {
+      const l = layouts[i]; if (!el||!l) return;
       el.style.setProperty('--rot', `${l.rot}deg`);
-      el.style.left = l.x + 'px';
-      el.style.top = l.y + 'px';
-      el.style.width = l.w + 'px';
-      el.style.height = l.h + 'px';
-      if (animateLast && i === cardElements.length - 1) {
-        el.style.animation = 'none';
-        el.offsetHeight;
-        el.style.animation = `cardEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards`;
+      el.style.left = l.x+'px'; el.style.top = l.y+'px';
+      el.style.width = l.w+'px'; el.style.height = l.h+'px';
+      if (animateLast && i===cardElements.length-1) {
+        el.style.animation='none'; el.offsetHeight;
+        el.style.animation='cardEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards';
       } else {
         el.style.transform = `rotate(${l.rot}deg)`;
       }
-    }
+    });
   }
 
-  window._addCard = function(entryData, isNew = true) {
+  function addCard(entryData, isNew=true) {
     const stage = document.getElementById('stage');
     const idx = galleryEntries.length;
-
     const card = document.createElement('div');
     card.className = 'vision-card';
-    card.style.position = 'absolute';
-    card.style.zIndex = 3;
+    card.style.cssText = 'position:absolute; z-index:3;';
     card.innerHTML = `
       <img src="${entryData.image}" alt="رؤية ${idx+1}">
       <div class="card-num">${idx+1}</div>
-      ${isNew && idx > 0 ? '<div class="card-new">جديد</div>' : ''}
+      ${isNew && idx>0 ? '<div class="card-new">جديد</div>' : ''}
       <button class="card-download" onclick="downloadCard(${idx})">⬇ تحميل</button>
     `;
     stage.appendChild(card);
     cardElements.push(card);
     galleryEntries.push(entryData);
-
     document.getElementById('emptyState').classList.add('hidden');
     applyLayoutToAll(isNew);
     startZoomCycle();
-  };
+  }
 
   window.downloadCard = function(idx) {
-    const entry = galleryEntries[idx];
-    if (!entry) return;
+    const entry = galleryEntries[idx]; if (!entry) return;
     const link = document.createElement('a');
-    link.download = `opinion_${idx + 1}.jpg`;
-    link.href = entry.image;
-    link.click();
+    link.download = entry.name || `opinion_${idx+1}.jpg`;
+    link.href = entry.image; link.click();
   };
 
   function startZoomCycle() {
     if (zoomInterval) clearInterval(zoomInterval);
-    if (galleryEntries.length === 0) return;
-    currentZoomIndex = 0;
-    doZoom();
+    if (!galleryEntries.length) return;
+    currentZoomIndex = 0; doZoom();
     zoomInterval = setInterval(() => {
-      if (galleryEntries.length === 0) { clearInterval(zoomInterval); return; }
-      currentZoomIndex = (currentZoomIndex + 1) % galleryEntries.length;
+      if (!galleryEntries.length) { clearInterval(zoomInterval); return; }
+      currentZoomIndex = (currentZoomIndex+1) % galleryEntries.length;
       doZoom();
     }, 3500);
   }
 
   function doZoom() {
-    if (cardElements.length === 0) return;
-    const el = cardElements[currentZoomIndex];
-    if (!el) return;
-    el.style.animation = 'none';
-    el.offsetHeight;
-    el.style.animation = 'zoomPulse 3s ease-in-out forwards';
-    el.style.zIndex = 10;
-    setTimeout(() => { if (el) el.style.zIndex = 3; }, 3000);
+    const el = cardElements[currentZoomIndex]; if (!el) return;
+    el.style.animation='none'; el.offsetHeight;
+    el.style.animation='zoomPulse 3s ease-in-out forwards';
+    el.style.zIndex=10;
+    setTimeout(() => { if(el) el.style.zIndex=3; }, 3000);
   }
 
   function toggleFS() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      document.getElementById('fs-icon').innerHTML = `<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>`;
-    } else {
-      document.exitFullscreen();
-      document.getElementById('fs-icon').innerHTML = `<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>`;
-    }
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
   }
 
-  window.addEventListener('resize', () => {
-    if (galleryEntries.length > 0) applyLayoutToAll(false);
-  });
+  window.addEventListener('resize', () => { if(galleryEntries.length) applyLayoutToAll(false); });
+
+  // ── بدء التحقق الدوري ──
+  fetchDrawings();
+  setInterval(fetchDrawings, POLL_INTERVAL);
 </script>
 </body>
 </html>
