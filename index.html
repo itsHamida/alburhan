@@ -19,7 +19,6 @@
     flex-direction: column;
   }
 
-  /* Paper texture background */
   body::before {
     content: '';
     position: fixed;
@@ -47,7 +46,6 @@
     touch-action: none;
   }
 
-  /* Bottom controls */
   #controls {
     position: fixed;
     bottom: 24px;
@@ -99,7 +97,12 @@
     transform: translateY(0);
   }
 
-  /* Fullscreen button */
+  .btn-done:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   #fullscreen-btn {
     position: fixed;
     bottom: 24px;
@@ -133,7 +136,6 @@
     stroke-linejoin: round;
   }
 
-  /* Hint text */
   #hint {
     position: absolute;
     top: 50%;
@@ -147,7 +149,6 @@
     user-select: none;
   }
 
-    /* Success flash */
   .flash {
     position: fixed;
     inset: 0;
@@ -181,6 +182,20 @@
     transform: translate(-50%, -50%) scale(1);
   }
 
+  /* Status indicator */
+  #status-dot {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    z-index: 20;
+    transition: background 0.3s;
+  }
+  #status-dot.connected { background: #4caf50; }
+  #status-dot.error { background: #f44336; }
 </style>
 </head>
 <body>
@@ -192,7 +207,7 @@
 
 <div id="controls">
   <button class="btn btn-clear" onclick="clearCanvas()">محو</button>
-  <button class="btn btn-done" onclick="sendToGallery()">تم</button>
+  <button class="btn btn-done" id="doneBtn" onclick="sendToGallery()">تم ✓</button>
 </div>
 
 <button id="fullscreen-btn" onclick="toggleFullscreen()" title="تكبير">
@@ -204,47 +219,85 @@
   </svg>
 </button>
 
+<div id="status-dot" title="حالة الاتصال"></div>
 <div class="flash" id="flash"></div>
-<div class="sent-msg" id="sentMsg">شكرا على مشاركة رأيك</div>
+<div class="sent-msg" id="sentMsg">✓ شكراً على مشاركة رأيك</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ======================================================
+  // 🔧 ضعي هنا بيانات مشروع Firebase الخاص بك
+  // ======================================================
+    const firebaseConfig = {
+    apiKey: "AIzaSyBOAMlq9lmExCuTpYu0OKlp7ZDC3LtOFVk",
+    authDomain: "alburhan-680f4.firebaseapp.com",
+    databaseURL: "https://alburhan-680f4-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "alburhan-680f4",
+    storageBucket: "alburhan-680f4.firebasestorage.app",
+    messagingSenderId: "662754849270",
+    appId: "1:662754849270:web:cbd3d76bb10994379ad7d7"
+  };
+  // ======================================================
+
+  let db, dbRef;
+  const statusDot = document.getElementById('status-dot');
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getDatabase(app);
+    dbRef = ref(db, 'gallery_entries');
+    statusDot.classList.add('connected');
+  } catch(e) {
+    console.error('Firebase init error:', e);
+    statusDot.classList.add('error');
+  }
+
+  // نجعل دالة الإرسال متاحة عالمياً
+  window._pushToFirebase = async function(imageData) {
+    if (!db) throw new Error('Firebase not initialized');
+    const entry = {
+      image: imageData,
+      timestamp: new Date().toLocaleString('ar-SA')
+    };
+    await push(dbRef, entry);
+  };
+</script>
 
 <script>
   const canvas = document.getElementById('drawCanvas');
   const ctx = canvas.getContext('2d');
   const hint = document.getElementById('hint');
+  const doneBtn = document.getElementById('doneBtn');
 
   let isDrawing = false;
   let lastX = 0, lastY = 0;
   let hasContent = false;
 
-function resizeCanvas() {
-  const container = document.getElementById('canvas-container');
-
-  const w = container.offsetWidth;
-  const h = container.offsetHeight;
-
-  const img = canvas.toDataURL();
-
-  canvas.width = w;
-  canvas.height = h;
-
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
-
-  setupContext();
-
-  if (hasContent) {
-    const image = new Image();
-    image.onload = () => ctx.drawImage(image, 0, 0, w, h);
-    image.src = img;
+  function resizeCanvas() {
+    const container = document.getElementById('canvas-container');
+    const w = container.offsetWidth;
+    const h = container.offsetHeight;
+    const img = canvas.toDataURL();
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    setupContext();
+    if (hasContent) {
+      const image = new Image();
+      image.onload = () => ctx.drawImage(image, 0, 0, w, h);
+      image.src = img;
+    }
   }
-}
 
   function setupContext() {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.strokeStyle = '#1a1a2e';
     ctx.lineWidth = 2.5;
-    // Slight texture/pressure variation effect
     ctx.shadowColor = 'rgba(10,10,30,0.15)';
     ctx.shadowBlur = 1;
   }
@@ -267,42 +320,35 @@ function resizeCanvas() {
   }
 
   function startDraw(e) {
-  e.preventDefault();
-  isDrawing = true;
-
-  const pos = getPos(e);
-  lastX = pos.x;
-  lastY = pos.y;
-
-  ctx.beginPath(); // هنا فقط
-  ctx.moveTo(lastX, lastY);
-
-  if (!hasContent) {
-    hasContent = true;
-    hint.style.opacity = '0';
-  }
+    e.preventDefault();
+    isDrawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    if (!hasContent) {
+      hasContent = true;
+      hint.style.opacity = '0';
+    }
   }
 
   function draw(e) {
-  if (!isDrawing) return;
-  e.preventDefault();
-  const pos = getPos(e);
-
-  const dx = pos.x - lastX;
-  const dy = pos.y - lastY;
-  const speed = Math.sqrt(dx*dx + dy*dy);
-  const width = Math.max(1.2, Math.min(3.5, 3.5 - speed * 0.04));
-
-  ctx.lineWidth = width;
-
-  ctx.lineTo(pos.x, pos.y);
-  ctx.stroke();
-
-  lastX = pos.x;
-  lastY = pos.y;
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    const dx = pos.x - lastX;
+    const dy = pos.y - lastY;
+    const speed = Math.sqrt(dx*dx + dy*dy);
+    const width = Math.max(1.2, Math.min(3.5, 3.5 - speed * 0.04));
+    ctx.lineWidth = width;
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastX = pos.x;
+    lastY = pos.y;
   }
 
-  function stopDraw(e) {
+  function stopDraw() {
     if (!isDrawing) return;
     isDrawing = false;
     ctx.beginPath();
@@ -322,53 +368,47 @@ function resizeCanvas() {
     hint.style.opacity = '1';
   }
 
-  function downloadImage(dataURL, filename) {
-  const link = document.createElement('a');
-  link.download = filename;
-  link.href = dataURL;
-  link.click();
-}
+  async function sendToGallery() {
+    if (!hasContent) return;
 
-  function sendToGallery() {
-  if (!hasContent) return;
+    doneBtn.disabled = true;
+    doneBtn.textContent = '⏳ جاري الإرسال...';
 
-  // Get image data as PNG
-  const imageData = canvas.toDataURL('image/png');
+    const imageData = canvas.toDataURL('image/png');
 
-  // Get existing entries
-  let entries = [];
-  try {
-    entries = JSON.parse(localStorage.getItem('gallery_entries') || '[]');
-  } catch(e) { entries = []; }
+    try {
+      // إرسال إلى Firebase (يظهر فوراً في gallery)
+      if (window._pushToFirebase) {
+        await window._pushToFirebase(imageData);
+      }
 
-  // Add new entry with timestamp
-  const newId = Date.now();
-  entries.push({
-    id: newId,
-    image: imageData,
-    timestamp: new Date().toLocaleString('ar-SA')
-  });
+      // تنزيل الصورة محلياً على الجهاز
+      const link = document.createElement('a');
+      link.download = `opinion_${Date.now()}.png`;
+      link.href = imageData;
+      link.click();
 
-  // Keep last 20 entries (يمكنك زيادة العدد أو إلغاء الحد)
-  if (entries.length > 20) entries = entries.slice(-20);
+      // رسالة تأكيد
+      const flash = document.getElementById('flash');
+      const msg = document.getElementById('sentMsg');
+      flash.classList.add('show');
+      msg.classList.add('show');
 
-  localStorage.setItem('gallery_entries', JSON.stringify(entries));
+      setTimeout(() => {
+        flash.classList.remove('show');
+        msg.classList.remove('show');
+        clearCanvas();
+        doneBtn.disabled = false;
+        doneBtn.textContent = 'تم ✓';
+      }, 1800);
 
-  // إضافة: تنزيل الصورة على الجهاز
-  downloadImage(imageData, `vision_${newId}.png`);
-
-  // إظهار رسالة التأكيد
-  const flash = document.getElementById('flash');
-  const msg = document.getElementById('sentMsg');
-  flash.classList.add('show');
-  msg.classList.add('show');
-
-  setTimeout(() => {
-    flash.classList.remove('show');
-    msg.classList.remove('show');
-    clearCanvas();
-  }, 1800);
-}
+    } catch(err) {
+      console.error('Send error:', err);
+      alert('حدث خطأ في الإرسال. تحقق من اتصال الإنترنت أو إعدادات Firebase.');
+      doneBtn.disabled = false;
+      doneBtn.textContent = 'تم ✓';
+    }
+  }
 
   function toggleFullscreen() {
     const icon = document.getElementById('fs-icon');
