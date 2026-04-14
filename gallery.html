@@ -312,18 +312,16 @@
 <!-- زر تفعيل/إيقاف التنزيل التلقائي -->
 <button id="auto-dl-toggle" onclick="toggleAutoDl()">⬇ تنزيل تلقائي: إيقاف</button>
 
-<!-- إشعار التنزيل -->
 <button class="btn-fs" onclick="toggleFS()" title="تكبير الشاشة">
   <svg id="fs-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
   </svg>
 </button>
 
-
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, get, onChildAdded, query, orderByKey } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBOAMlq9lmExCuTpYu0OKlp7ZDC3LtOFVk",
@@ -338,34 +336,41 @@
   const connDot = document.getElementById('conn-dot');
   const connLabel = document.getElementById('conn-label');
 
-  // نتجاهل الصور الموجودة مسبقاً، ننزل الجديدة فقط
-  let isInitialLoad = true;
-  let initialCount = 0;
-  let loadedCount = 0;
-
   try {
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const galleryRef = ref(db, 'gallery_entries');
 
     connDot.classList.add('live');
-    connLabel.textContent = 'متصل — في انتظار الرسومات';
+    connLabel.textContent = 'متصل — جاري التحميل...';
 
-    // أول دفعة = صور قديمة، لا ننزلها تلقائياً
-    // بعد ثانيتين نعتبر التحميل الأولي انتهى
-    setTimeout(() => { isInitialLoad = false; }, 2000);
+    // الخطوة 1: اجلب الصور الموجودة أولاً بـ get() — هذي قديمة، ما تتنزل تلقائياً
+    const existingSnap = await get(galleryRef);
+    const existingKeys = new Set();
 
+    if (existingSnap.exists()) {
+      existingSnap.forEach((child) => {
+        existingKeys.add(child.key);
+        const entry = child.val();
+        if (entry && entry.image) {
+          window._addCard(entry, false); // false = مش جديدة
+        }
+      });
+    }
+
+    const count = existingKeys.size;
+    connLabel.textContent = `متصل • ${count} رسمة موجودة — في انتظار الجديدة`;
+
+    // الخطوة 2: استمع للإضافات الجديدة فقط (اللي مفتاحها مش في existingKeys)
     onChildAdded(galleryRef, (snapshot) => {
+      if (existingKeys.has(snapshot.key)) return; // تجاهل القديمة
+
       const entry = snapshot.val();
       if (entry && entry.image) {
-        const isNew = !isInitialLoad;
-        window._addCard(entry, isNew);
-        connLabel.textContent = `متصل • ${document.querySelectorAll('.vision-card').length} رسمة`;
-
-        // تنزيل تلقائي فقط للصور الجديدة (مش القديمة اللي محملة عند فتح الصفحة)
-        if (isNew) {
-          window._autoDownload(entry, document.querySelectorAll('.vision-card').length);
-        }
+        window._addCard(entry, true); // true = جديدة
+        const total = document.querySelectorAll('.vision-card').length;
+        connLabel.textContent = `متصل • ${total} رسمة`;
+        window._autoDownload(entry, total);
       }
     });
 
