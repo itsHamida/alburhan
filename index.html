@@ -6,195 +6,91 @@
 <title>لوحة الكتابة</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500&display=swap');
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     font-family: 'Tajawal', sans-serif;
     background: #ffffff;
-    width: 100vw;
-    height: 100vh;
+    width: 100vw; height: 100vh;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
   }
-
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      repeating-linear-gradient(
-        transparent,
-        transparent 38px,
-        #625a5030 39px
-      );
-    pointer-events: none;
-    z-index: 0;
+    position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(transparent, transparent 38px, #625a5030 39px);
+    pointer-events: none; z-index: 0;
   }
-
-  #canvas-container {
-    position: relative;
-    flex: 1;
-    z-index: 1;
-  }
-
-  #drawCanvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-  }
-
+  #canvas-container { position: relative; flex: 1; z-index: 1; }
+  #drawCanvas { display: block; width: 100%; height: 100%; touch-action: none; }
   #controls {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
+    position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    z-index: 10;
+    display: flex; align-items: center; gap: 16px; z-index: 10;
   }
-
   .btn {
     font-family: 'Tajawal', sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    padding: 12px 32px;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
+    font-size: 16px; font-weight: 500;
+    padding: 12px 32px; border: none;
+    border-radius: 50px; cursor: pointer;
     transition: all 0.2s ease;
-    letter-spacing: 0.5px;
   }
-
   .btn-clear {
-    background: #fff;
-    color: #888;
+    background: #fff; color: #888;
     border: 2px solid #ddd;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
-
-  .btn-clear:hover {
-    border-color: #bbb;
-    color: #555;
-    transform: translateY(-1px);
-  }
-
+  .btn-clear:hover { border-color: #bbb; color: #555; transform: translateY(-1px); }
   .btn-done {
     background: linear-gradient(135deg, #0d3061, #33445c);
     color: white;
-    box-shadow: 0 4px 16px rgba(4, 47, 117, 0.35);
+    box-shadow: 0 4px 16px rgba(4,47,117,0.35);
   }
-
-  .btn-done:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(4, 47, 117,0.45);
-  }
-
-  .btn-done:active {
-    transform: translateY(0);
-  }
-
-  .btn-done:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-
+  .btn-done:hover { transform: translateY(-2px); }
+  .btn-done:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
   #fullscreen-btn {
-    position: fixed;
-    bottom: 24px;
-    left: 24px;
-    width: 44px;
-    height: 44px;
-    background: white;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: all 0.2s;
+    position: fixed; bottom: 24px; left: 24px;
+    width: 44px; height: 44px;
+    background: white; border: 2px solid #ddd;
+    border-radius: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
-
-  #fullscreen-btn:hover {
-    border-color: #bbb;
-    transform: scale(1.05);
-  }
-
   #fullscreen-btn svg {
-    width: 20px;
-    height: 20px;
-    stroke: #666;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    width: 20px; height: 20px;
+    stroke: #666; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
   }
-
   #hint {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    color: #c8b8a2;
-    font-size: 40px;
-    font-weight: 300;
-    pointer-events: none;
-    transition: opacity 0.4s;
-    user-select: none;
+    color: #c8b8a2; font-size: 40px; font-weight: 300;
+    pointer-events: none; transition: opacity 0.4s; user-select: none;
   }
-
   .flash {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(44,95,138,0.12);
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
+    z-index: 100; pointer-events: none;
+    opacity: 0; transition: opacity 0.3s;
   }
   .flash.show { opacity: 1; }
-
   .sent-msg {
-    position: fixed;
-    top: 50%;
-    left: 50%;
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(0.9);
-    background: white;
-    padding: 20px 36px;
+    background: white; padding: 20px 36px;
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    font-size: 18px;
-    color: #2c5f8a;
-    z-index: 101;
-    opacity: 0;
+    font-size: 18px; color: #2c5f8a;
+    z-index: 101; opacity: 0;
     transition: all 0.3s ease;
-    text-align: center;
-    pointer-events: none;
+    text-align: center; pointer-events: none;
   }
-  .sent-msg.show {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
+  .sent-msg.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   #status-dot {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ccc;
-    z-index: 20;
-    transition: background 0.3s;
+    position: fixed; top: 16px; left: 16px;
+    width: 10px; height: 10px;
+    border-radius: 50%; background: #4caf50; z-index: 20;
   }
-  #status-dot.connected { background: #4caf50; }
-  #status-dot.error { background: #f44336; }
 </style>
 </head>
 <body>
@@ -209,8 +105,8 @@
   <button class="btn btn-done" id="doneBtn" onclick="sendToGallery()">تم ✓</button>
 </div>
 
-<button id="fullscreen-btn" onclick="toggleFullscreen()" title="تكبير">
-  <svg id="fs-icon" viewBox="0 0 24 24">
+<button id="fullscreen-btn" onclick="toggleFullscreen()">
+  <svg viewBox="0 0 24 24">
     <polyline points="15 3 21 3 21 9"/>
     <polyline points="9 21 3 21 3 15"/>
     <line x1="21" y1="3" x2="14" y2="10"/>
@@ -218,94 +114,31 @@
   </svg>
 </button>
 
-<div id="status-dot" title="حالة الاتصال"></div>
+<div id="status-dot"></div>
 <div class="flash" id="flash"></div>
 <div class="sent-msg" id="sentMsg">✓ شكراً على مشاركة رأيك</div>
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBOAMlq9lmExCuTpYu0OKlp7ZDC3LtOFVk",
-    authDomain: "alburhan-680f4.firebaseapp.com",
-    databaseURL: "https://alburhan-680f4-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "alburhan-680f4",
-    storageBucket: "alburhan-680f4.firebasestorage.app",
-    messagingSenderId: "662754849270",
-    appId: "1:662754849270:web:cbd3d76bb10994379ad7d7"
-  };
-
-  let db, dbRef;
-  const statusDot = document.getElementById('status-dot');
-
-  try {
-    const app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    dbRef = ref(db, 'gallery_entries');
-    statusDot.classList.add('connected');
-  } catch(e) {
-    console.error('Firebase init error:', e);
-    statusDot.classList.add('error');
-  }
-
-  window._pushToFirebase = async function(imageData) {
-    if (!db) throw new Error('Firebase not initialized');
-
-    // ضغط الصورة قبل الإرسال لتجنب حد الحجم
-    const compressed = await compressImage(imageData, 1200, 0.82);
-
-    const entry = {
-      image: compressed,
-      timestamp: new Date().toLocaleString('ar-SA')
-    };
-    await push(dbRef, entry);
-  };
-
-  // ضغط الصورة
-  function compressImage(dataURL, maxWidth, quality) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let w = img.width, h = img.height;
-        if (w > maxWidth) {
-          h = Math.round(h * maxWidth / w);
-          w = maxWidth;
-        }
-        canvas.width = w;
-        canvas.height = h;
-        const c = canvas.getContext('2d');
-        c.fillStyle = '#ffffff';
-        c.fillRect(0, 0, w, h);
-        c.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.src = dataURL;
-    });
-  }
-</script>
-
 <script>
+  // ======================================================
+  // 🔧 ضعي الـ Token الجديد هنا فقط — لا ترسليه لأحد
+  // ======================================================
+  const GITHUB_TOKEN  = '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';
+  const GITHUB_OWNER  = 'itsHamida';
+  const GITHUB_REPO   = 'alburhan';
+  const GITHUB_FOLDER = 'drawings';
+  // ======================================================
+
   const canvas = document.getElementById('drawCanvas');
   const ctx = canvas.getContext('2d');
   const hint = document.getElementById('hint');
   const doneBtn = document.getElementById('doneBtn');
-
-  let isDrawing = false;
-  let lastX = 0, lastY = 0;
-  let hasContent = false;
+  let isDrawing = false, lastX = 0, lastY = 0, hasContent = false;
 
   function resizeCanvas() {
     const container = document.getElementById('canvas-container');
-    const w = container.offsetWidth;
-    const h = container.offsetHeight;
+    const w = container.offsetWidth, h = container.offsetHeight;
     const img = canvas.toDataURL();
-    canvas.width = w;
-    canvas.height = h;
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
+    canvas.width = w; canvas.height = h;
     setupContext();
     if (hasContent) {
       const image = new Image();
@@ -315,12 +148,9 @@
   }
 
   function setupContext() {
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 2.5;
-    ctx.shadowColor = 'rgba(10,10,30,0.15)';
-    ctx.shadowBlur = 1;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 2.5;
+    ctx.shadowColor = 'rgba(10,10,30,0.15)'; ctx.shadowBlur = 1;
   }
 
   resizeCanvas();
@@ -328,12 +158,10 @@
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    if (e.touches) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * (canvas.width / rect.width),
-        y: (e.touches[0].clientY - rect.top) * (canvas.height / rect.height)
-      };
-    }
+    if (e.touches) return {
+      x: (e.touches[0].clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.touches[0].clientY - rect.top) * (canvas.height / rect.height)
+    };
     return {
       x: (e.clientX - rect.left) * (canvas.width / rect.width),
       y: (e.clientY - rect.top) * (canvas.height / rect.height)
@@ -344,35 +172,24 @@
     e.preventDefault();
     isDrawing = true;
     const pos = getPos(e);
-    lastX = pos.x;
-    lastY = pos.y;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    if (!hasContent) {
-      hasContent = true;
-      hint.style.opacity = '0';
-    }
+    lastX = pos.x; lastY = pos.y;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY);
+    if (!hasContent) { hasContent = true; hint.style.opacity = '0'; }
   }
 
   function draw(e) {
     if (!isDrawing) return;
     e.preventDefault();
     const pos = getPos(e);
-    const dx = pos.x - lastX;
-    const dy = pos.y - lastY;
-    const speed = Math.sqrt(dx*dx + dy*dy);
-    const width = Math.max(1.2, Math.min(3.5, 3.5 - speed * 0.04));
-    ctx.lineWidth = width;
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastX = pos.x;
-    lastY = pos.y;
+    const speed = Math.sqrt((pos.x-lastX)**2 + (pos.y-lastY)**2);
+    ctx.lineWidth = Math.max(1.2, Math.min(3.5, 3.5 - speed * 0.04));
+    ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    lastX = pos.x; lastY = pos.y;
   }
 
   function stopDraw() {
     if (!isDrawing) return;
-    isDrawing = false;
-    ctx.beginPath();
+    isDrawing = false; ctx.beginPath();
   }
 
   canvas.addEventListener('mousedown', startDraw);
@@ -389,59 +206,75 @@
     hint.style.opacity = '1';
   }
 
+  function compressImage(dataURL) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > 1200) { h = Math.round(h * 1200 / w); w = 1200; }
+        c.width = w; c.height = h;
+        const cx = c.getContext('2d');
+        cx.fillStyle = '#ffffff';
+        cx.fillRect(0, 0, w, h);
+        cx.drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = dataURL;
+    });
+  }
+
   async function sendToGallery() {
     if (!hasContent) return;
-
     doneBtn.disabled = true;
     doneBtn.textContent = '⏳ جاري الإرسال...';
 
-    const imageData = canvas.toDataURL('image/png');
-
     try {
-      if (window._pushToFirebase) {
-        await window._pushToFirebase(imageData);
+      const compressed = await compressImage(canvas.toDataURL('image/png'));
+      const base64 = compressed.split(',')[1];
+      const filename = `${GITHUB_FOLDER}/drawing_${Date.now()}.jpg`;
+
+      const res = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filename}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `drawing ${Date.now()}`,
+            content: base64
+          })
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'GitHub error');
       }
 
-      const flash = document.getElementById('flash');
-      const msg = document.getElementById('sentMsg');
-      flash.classList.add('show');
-      msg.classList.add('show');
+      document.getElementById('flash').classList.add('show');
+      document.getElementById('sentMsg').classList.add('show');
 
       setTimeout(() => {
-        flash.classList.remove('show');
-        msg.classList.remove('show');
+        document.getElementById('flash').classList.remove('show');
+        document.getElementById('sentMsg').classList.remove('show');
         clearCanvas();
         doneBtn.disabled = false;
         doneBtn.textContent = 'تم ✓';
       }, 1800);
 
     } catch(err) {
-      console.error('Send error:', err);
-      alert('حدث خطأ في الإرسال. تحقق من اتصال الإنترنت أو إعدادات Firebase.');
+      alert('خطأ: ' + err.message);
       doneBtn.disabled = false;
       doneBtn.textContent = 'تم ✓';
     }
   }
 
   function toggleFullscreen() {
-    const icon = document.getElementById('fs-icon');
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      icon.innerHTML = `
-        <polyline points="8 3 3 3 3 8"/>
-        <polyline points="21 8 21 3 16 3"/>
-        <line x1="3" y1="3" x2="10" y2="10"/>
-        <line x1="21" y1="3" x2="14" y2="10"/>
-      `;
-    } else {
-      document.exitFullscreen();
-      icon.innerHTML = `
-        <polyline points="15 3 21 3 21 9"/>
-        <polyline points="9 21 3 21 3 15"/>
-        <line x1="21" y1="3" x2="14" y2="10"/>
-        <line x1="3" y1="21" x2="10" y2="14"/>
-      `;
-    }
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
   }
 </script>
 </body>
