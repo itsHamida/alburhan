@@ -182,7 +182,6 @@
     transform: translate(-50%, -50%) scale(1);
   }
 
-  /* Status indicator */
   #status-dot {
     position: fixed;
     top: 16px;
@@ -228,10 +227,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // ======================================================
-  // 🔧 ضعي هنا بيانات مشروع Firebase الخاص بك
-  // ======================================================
-    const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyBOAMlq9lmExCuTpYu0OKlp7ZDC3LtOFVk",
     authDomain: "alburhan-680f4.firebaseapp.com",
     databaseURL: "https://alburhan-680f4-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -240,7 +236,6 @@
     messagingSenderId: "662754849270",
     appId: "1:662754849270:web:cbd3d76bb10994379ad7d7"
   };
-  // ======================================================
 
   let db, dbRef;
   const statusDot = document.getElementById('status-dot');
@@ -255,15 +250,41 @@
     statusDot.classList.add('error');
   }
 
-  // نجعل دالة الإرسال متاحة عالمياً
   window._pushToFirebase = async function(imageData) {
     if (!db) throw new Error('Firebase not initialized');
+
+    // ضغط الصورة قبل الإرسال لتجنب حد الحجم
+    const compressed = await compressImage(imageData, 1200, 0.82);
+
     const entry = {
-      image: imageData,
+      image: compressed,
       timestamp: new Date().toLocaleString('ar-SA')
     };
     await push(dbRef, entry);
   };
+
+  // ضغط الصورة
+  function compressImage(dataURL, maxWidth, quality) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) {
+          h = Math.round(h * maxWidth / w);
+          w = maxWidth;
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const c = canvas.getContext('2d');
+        c.fillStyle = '#ffffff';
+        c.fillRect(0, 0, w, h);
+        c.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = dataURL;
+    });
+  }
 </script>
 
 <script>
@@ -377,18 +398,10 @@
     const imageData = canvas.toDataURL('image/png');
 
     try {
-      // إرسال إلى Firebase (يظهر فوراً في gallery)
       if (window._pushToFirebase) {
         await window._pushToFirebase(imageData);
       }
 
-      // تنزيل الصورة محلياً على الجهاز
-      const link = document.createElement('a');
-      link.download = `opinion_${Date.now()}.png`;
-      link.href = imageData;
-      link.click();
-
-      // رسالة تأكيد
       const flash = document.getElementById('flash');
       const msg = document.getElementById('sentMsg');
       flash.classList.add('show');
