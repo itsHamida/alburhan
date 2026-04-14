@@ -97,17 +97,8 @@
   }
   .empty-state.hidden { opacity: 0; }
 
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-    opacity: 0.4;
-  }
-
-  .empty-text {
-    font-size: 15px;
-    font-weight: 300;
-    letter-spacing: 1px;
-  }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-text { font-size: 15px; font-weight: 300; letter-spacing: 1px; }
 
   .logo {
     position: fixed;
@@ -121,7 +112,6 @@
     border: 2px solid rgba(201,168,76,0.5);
     box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     object-fit: contain;
-    transition: transform 0.3s ease;
   }
 
   .vision-card {
@@ -132,7 +122,6 @@
     border: 1.5px solid rgba(201,168,76,0.2);
     cursor: default;
     transform-origin: center center;
-    transition: box-shadow 0.3s ease;
     background: var(--mid);
   }
 
@@ -154,6 +143,26 @@
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 20px;
+  }
+
+  /* NEW badge for freshly arrived cards */
+  .vision-card .card-new {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    background: rgba(76, 175, 80, 0.9);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    animation: fadeOutBadge 3s forwards;
+  }
+
+  @keyframes fadeOutBadge {
+    0%   { opacity: 1; }
+    70%  { opacity: 1; }
+    100% { opacity: 0; display: none; }
   }
 
   .btn-fs {
@@ -179,17 +188,59 @@
   }
   .btn-fs svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; }
 
+  /* Connection status */
+  #conn-status {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    z-index: 20;
+    font-size: 12px;
+    color: rgba(201,168,76,0.5);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #conn-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #555;
+    transition: background 0.3s;
+  }
+  #conn-dot.live { background: #4caf50; box-shadow: 0 0 6px #4caf5088; }
+  #conn-dot.error { background: #f44336; }
+
   @keyframes cardEnter {
     from { opacity: 0; transform: scale(0.5) rotate(-5deg); }
     to { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
   }
 
   @keyframes zoomPulse {
-  0%   { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-  40%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
-  70%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
-  100% { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 3; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-}
+    0%   { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    40%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
+    70%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
+    100% { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 3; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  }
+
+  /* Download button on hover */
+  .vision-card:hover .card-download {
+    opacity: 1;
+  }
+  .card-download {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: rgba(13,27,42,0.85);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--gold);
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    z-index: 5;
+  }
 </style>
 </head>
 <body>
@@ -212,34 +263,77 @@
   </svg>
 </button>
 
+<div id="conn-status">
+  <div id="conn-dot"></div>
+  <span id="conn-label">جاري الاتصال...</span>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // ======================================================
+  // 🔧 ضعي هنا نفس بيانات مشروع Firebase من index.html
+  // ======================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOAMlq9lmExCuTpYu0OKlp7ZDC3LtOFVk",
+    authDomain: "alburhan-680f4.firebaseapp.com",
+    databaseURL: "https://alburhan-680f4-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "alburhan-680f4",
+    storageBucket: "alburhan-680f4.firebasestorage.app",
+    messagingSenderId: "662754849270",
+    appId: "1:662754849270:web:cbd3d76bb10994379ad7d7"
+  };
+  // ======================================================
+
+  const connDot = document.getElementById('conn-dot');
+  const connLabel = document.getElementById('conn-label');
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const galleryRef = ref(db, 'gallery_entries');
+
+    connDot.classList.add('live');
+    connLabel.textContent = 'متصل — في انتظار الرسومات';
+
+    // يُستدعى فور وصول أي رسم جديد (سواء قديم أو جديد)
+    onChildAdded(galleryRef, (snapshot) => {
+      const entry = snapshot.val();
+      if (entry && entry.image) {
+        window._addCard(entry, true);
+        connLabel.textContent = `متصل • ${document.querySelectorAll('.vision-card').length} رسمة`;
+      }
+    });
+
+  } catch(e) {
+    console.error('Firebase error:', e);
+    connDot.classList.add('error');
+    connLabel.textContent = 'خطأ في الاتصال';
+  }
+</script>
+
 <script>
-  // ---------- المتغيرات العامة ----------
-  let galleryEntries = [];      // مصفوفة الكائنات { id, image, timestamp }
-  let cardElements = [];        // عناصر DOM للبطاقات (بنفس الترتيب)
+  let galleryEntries = [];
+  let cardElements = [];
   let zoomInterval = null;
   let currentZoomIndex = 0;
-  let knownIds = new Set();     // لتتبع المعرفات الموجودة حالياً
 
-  // ---------- دوال التوزيع (Layout) ----------
   function getStageRect() {
     const stage = document.getElementById('stage');
     return { w: stage.offsetWidth, h: stage.offsetHeight };
   }
 
-  // حساب أحجام البطاقات بناءً على العدد (تكيف تلقائي)
   function getCardSizeRange(n) {
     let maxW, maxH, minW, minH;
     if (n <= 30) {
-      maxW = 240; maxH = 180;
-      minW = 120; minH = 90;
+      maxW = 240; maxH = 180; minW = 120; minH = 90;
     } else if (n <= 70) {
-      maxW = 180; maxH = 135;
-      minW = 100; minH = 75;
+      maxW = 180; maxH = 135; minW = 100; minH = 75;
     } else {
-      maxW = 140; maxH = 105;
-      minW = 80;  minH = 60;
+      maxW = 140; maxH = 105; minW = 80; minH = 60;
     }
-    // ألا يتجاوز 40% من عرض/ارتفاع المرحلة
     const { w, h } = getStageRect();
     maxW = Math.min(maxW, w * 0.35);
     maxH = Math.min(maxH, h * 0.35);
@@ -248,105 +342,66 @@
     return { minW, maxW, minH, maxH };
   }
 
-  // توليد مواقع غير متداخلة لـ n بطاقة
   function computeLayout(n) {
-  const { w, h } = getStageRect();
-  const padding = 15; // مسافة أمان من الحواف
-  const topSafeZone = Math.max(80, h * 0.18);
-  
-  if (n === 0) return [];
-
-  // حالة بطاقة واحدة
-  if (n === 1) {
-    const { maxW, maxH } = getCardSizeRange(1);
-    const cw = Math.min(w * 0.5, maxW);
-    const ch = Math.min(h * 0.5, maxH);
-    let x = (w - cw) / 2;
-    let y = (h - ch) / 2 + topSafeZone / 2;
-    x = Math.min(w - cw - padding, Math.max(padding, x));
-    y = Math.min(h - ch - padding, Math.max(topSafeZone, y));
-    return [{ x, y, w: cw, h: ch, rot: 0 }];
-  }
-
-  const { minW, maxW, minH, maxH } = getCardSizeRange(n);
-  const layouts = [];
-  const maxAttempts = n * 150;
-  let attempts = 0;
-
-  while (layouts.length < n && attempts < maxAttempts) {
-    attempts++;
-    const cw = minW + Math.random() * (maxW - minW);
-    const ch = minH + Math.random() * (maxH - minH);
-    const rot = (Math.random() - 0.5) * 8;
-
-    // تحديد منطقة أفقية (يسار، وسط، يمين)
-    const zone = Math.random();
-    let x, y;
-
-    // أقصى يسار مسموح به
-    const minX = padding;
-    const maxX = w - cw - padding;
-    const minY = topSafeZone;
-    const maxY = h - ch - padding;
-
-    if (zone < 0.33) { // المنطقة اليسرى
-      // المدى: من padding إلى 30% عرض الشاشة
-      const leftMax = Math.min(maxX, w * 0.3);
-      x = minX + Math.random() * (leftMax - minX);
-    } 
-    else if (zone < 0.66) { // المنطقة الوسطى
-      const centerStart = w * 0.35;
-      const centerEnd = w * 0.65;
-      x = Math.max(minX, Math.min(maxX, centerStart + Math.random() * (centerEnd - centerStart)));
-    } 
-    else { // المنطقة اليمنى
-      const rightStart = Math.max(minX, w * 0.7);
-      x = rightStart + Math.random() * (maxX - rightStart);
+    const { w, h } = getStageRect();
+    const padding = 15;
+    const topSafeZone = Math.max(80, h * 0.18);
+    if (n === 0) return [];
+    if (n === 1) {
+      const { maxW, maxH } = getCardSizeRange(1);
+      const cw = Math.min(w * 0.5, maxW);
+      const ch = Math.min(h * 0.5, maxH);
+      let x = Math.min(w - cw - padding, Math.max(padding, (w - cw) / 2));
+      let y = Math.min(h - ch - padding, Math.max(topSafeZone, (h - ch) / 2 + topSafeZone / 2));
+      return [{ x, y, w: cw, h: ch, rot: 0 }];
     }
+    const { minW, maxW, minH, maxH } = getCardSizeRange(n);
+    const layouts = [];
+    const maxAttempts = n * 150;
+    let attempts = 0;
 
-    // تأمين نهائي لـ x
-    x = Math.min(maxX, Math.max(minX, x));
+    while (layouts.length < n && attempts < maxAttempts) {
+      attempts++;
+      const cw = minW + Math.random() * (maxW - minW);
+      const ch = minH + Math.random() * (maxH - minH);
+      const rot = (Math.random() - 0.5) * 8;
+      const zone = Math.random();
+      const minX = padding, maxX = w - cw - padding;
+      const minY = topSafeZone, maxY = h - ch - padding;
+      let x, y;
+      if (zone < 0.33) {
+        x = minX + Math.random() * (Math.min(maxX, w * 0.3) - minX);
+      } else if (zone < 0.66) {
+        x = Math.max(minX, Math.min(maxX, w * 0.35 + Math.random() * (w * 0.3)));
+      } else {
+        x = Math.max(minX, w * 0.7) + Math.random() * (maxX - Math.max(minX, w * 0.7));
+      }
+      x = Math.min(maxX, Math.max(minX, x));
+      y = Math.min(maxY, Math.max(minY, minY + Math.random() * (maxY - minY)));
 
-    // y عشوائي ضمن النطاق المسموح
-    y = minY + Math.random() * (maxY - minY);
-    y = Math.min(maxY, Math.max(minY, y));
-
-    // فحص التداخل (أقل من 2% مساحة متداخلة)
-    let overlap = false;
-    for (const l of layouts) {
-      const ix = Math.max(x, l.x);
-      const iy = Math.max(y, l.y);
-      const iw = Math.min(x + cw, l.x + l.w) - ix;
-      const ih = Math.min(y + ch, l.y + l.h) - iy;
-      if (iw > 0 && ih > 0) {
-        const overlapArea = iw * ih;
-        const areaThis = cw * ch;
-        if (overlapArea / areaThis > 0.02) {
-          overlap = true;
-          break;
+      let overlap = false;
+      for (const l of layouts) {
+        const ix = Math.max(x, l.x), iy = Math.max(y, l.y);
+        const iw = Math.min(x + cw, l.x + l.w) - ix;
+        const ih = Math.min(y + ch, l.y + l.h) - iy;
+        if (iw > 0 && ih > 0 && (iw * ih) / (cw * ch) > 0.02) {
+          overlap = true; break;
         }
       }
+      if (!overlap) layouts.push({ x, y, w: cw, h: ch, rot });
     }
-    if (!overlap) {
+
+    while (layouts.length < n) {
+      const cw = minW + Math.random() * (maxW - minW);
+      const ch = minH + Math.random() * (maxH - minH);
+      const rot = (Math.random() - 0.5) * 8;
+      let x = Math.min(w - cw - padding, Math.max(padding, padding + Math.random() * (w - cw - 2 * padding)));
+      let y = Math.min(h - ch - padding, Math.max(topSafeZone, topSafeZone + Math.random() * (h - ch - topSafeZone)));
       layouts.push({ x, y, w: cw, h: ch, rot });
     }
+    return layouts;
   }
 
-  // حشو البطاقات المتبقية (fallback) مع حدود صارمة جداً
-  while (layouts.length < n) {
-    const cw = minW + Math.random() * (maxW - minW);
-    const ch = minH + Math.random() * (maxH - minH);
-    const rot = (Math.random() - 0.5) * 8;
-    let x = padding + Math.random() * (w - cw - 2 * padding);
-    let y = topSafeZone + Math.random() * (h - ch - topSafeZone);
-    x = Math.min(w - cw - padding, Math.max(padding, x));
-    y = Math.min(h - ch - padding, Math.max(topSafeZone, y));
-    layouts.push({ x, y, w: cw, h: ch, rot });
-  }
-  return layouts;
-}
-
-  // تطبيق التوزيع على جميع البطاقات الموجودة (بدون إضافة/حذف)
   function applyLayoutToAll(animateLast = false) {
     if (galleryEntries.length === 0) return;
     const layouts = computeLayout(galleryEntries.length);
@@ -369,10 +424,10 @@
     }
   }
 
-  // ---------- إدارة البطاقات (إضافة فردية) ----------
-  function addOneCard(entryData, isNew = true) {
+  // الدالة الرئيسية — تُستدعى من Firebase listener
+  window._addCard = function(entryData, isNew = true) {
     const stage = document.getElementById('stage');
-    const idx = galleryEntries.length; // الرقم التسلسلي الجديد
+    const idx = galleryEntries.length;
 
     const card = document.createElement('div');
     card.className = 'vision-card';
@@ -381,62 +436,35 @@
     card.innerHTML = `
       <img src="${entryData.image}" alt="رؤية ${idx+1}">
       <div class="card-num">${idx+1}</div>
+      ${isNew && idx > 0 ? '<div class="card-new">جديد</div>' : ''}
+      <button class="card-download" onclick="downloadCard(${idx})">⬇ تحميل</button>
     `;
     stage.appendChild(card);
     cardElements.push(card);
     galleryEntries.push(entryData);
-    knownIds.add(entryData.id);
 
-    // إخفاء الرسالة الفارغة
     document.getElementById('emptyState').classList.add('hidden');
-
-    // إعادة توزيع جميع البطاقات (بما فيها الجديدة) للحصول على ترتيب مثالي
     applyLayoutToAll(isNew);
-
-    // إعادة تشغيل دورة التكبير (لأن العدد تغير)
     startZoomCycle();
-  }
+  };
 
-  // ---------- مزامنة مع localStorage ----------
-  function syncWithStorage() {
-    let stored = [];
-    try {
-      const raw = localStorage.getItem('gallery_entries');
-      if (raw) stored = JSON.parse(raw);
-    } catch(e) { stored = []; }
+  // تنزيل صورة بطاقة محددة
+  window.downloadCard = function(idx) {
+    const entry = galleryEntries[idx];
+    if (!entry) return;
+    const link = document.createElement('a');
+    link.download = `opinion_${idx + 1}.png`;
+    link.href = entry.image;
+    link.click();
+  };
 
-    // إضافة أي بطاقات جديدة غير موجودة حالياً
-    let added = false;
-    for (const entry of stored) {
-      if (!knownIds.has(entry.id)) {
-        addOneCard(entry, true);
-        added = true;
-      }
-    }
-
-    // (اختياري) إذا أردت حذف البطاقات التي لم تعد موجودة في المخزن – لا نفعله تلقائياً
-    // حتى لا تختفي البطاقات عند مسح localStorage يدوياً.
-
-    // إذا لم تكن هناك أي بطاقات وعرضنا الرسالة
-    if (galleryEntries.length === 0) {
-      document.getElementById('emptyState').classList.remove('hidden');
-      if (zoomInterval) clearInterval(zoomInterval);
-    } else if (added) {
-      // تمت إضافة بطاقات جديدة، تم بالفعل استدعاء startZoomCycle داخل addOneCard
-    }
-  }
-
-  // ---------- دورة التكبير التلقائي ----------
   function startZoomCycle() {
     if (zoomInterval) clearInterval(zoomInterval);
     if (galleryEntries.length === 0) return;
     currentZoomIndex = 0;
     doZoom();
     zoomInterval = setInterval(() => {
-      if (galleryEntries.length === 0) {
-        clearInterval(zoomInterval);
-        return;
-      }
+      if (galleryEntries.length === 0) { clearInterval(zoomInterval); return; }
       currentZoomIndex = (currentZoomIndex + 1) % galleryEntries.length;
       doZoom();
     }, 3500);
@@ -450,12 +478,9 @@
     el.offsetHeight;
     el.style.animation = 'zoomPulse 3s ease-in-out forwards';
     el.style.zIndex = 10;
-    setTimeout(() => {
-      if (el) el.style.zIndex = 3;
-    }, 3000);
+    setTimeout(() => { if (el) el.style.zIndex = 3; }, 3000);
   }
 
-  // ---------- أحداث إضافية ----------
   function toggleFS() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -467,15 +492,8 @@
   }
 
   window.addEventListener('resize', () => {
-    if (galleryEntries.length > 0) {
-      // إعادة التوزيع عند تغيير حجم الشاشة
-      applyLayoutToAll(false);
-    }
+    if (galleryEntries.length > 0) applyLayoutToAll(false);
   });
-
-  // بدء المراقبة
-  setInterval(syncWithStorage, 800);
-  syncWithStorage(); // التحميل الأولي
 </script>
 </body>
 </html>
