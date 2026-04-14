@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الكتابة</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: #ffffff;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Paper texture background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        transparent,
+        transparent 38px,
+        #625a5030 39px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #canvas-container {
+    position: relative;
+    flex: 1;
+    z-index: 1;
+  }
+
+  #drawCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  /* Bottom controls */
+  #controls {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 10;
+  }
+
+  .btn {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 32px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-clear {
+    background: #fff;
+    color: #888;
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .btn-clear:hover {
+    border-color: #bbb;
+    color: #555;
+    transform: translateY(-1px);
+  }
+
+  .btn-done {
+    background: linear-gradient(135deg, #0d3061, #33445c);
+    color: white;
+    box-shadow: 0 4px 16px rgba(4, 47, 117, 0.35);
+  }
+
+  .btn-done:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(4, 47, 117,0.45);
+  }
+
+  .btn-done:active {
+    transform: translateY(0);
+  }
+
+  /* Fullscreen button */
+  #fullscreen-btn {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: 44px;
+    height: 44px;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  #fullscreen-btn:hover {
+    border-color: #bbb;
+    transform: scale(1.05);
+  }
+
+  #fullscreen-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: #666;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Hint text */
+  #hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #c8b8a2;
+    font-size: 40px;
+    font-weight: 300;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    user-select: none;
+  }
+
+    /* Success flash */
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: rgba(44,95,138,0.12);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .flash.show { opacity: 1; }
+
+  .sent-msg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: white;
+    padding: 20px 36px;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    font-size: 18px;
+    color: #2c5f8a;
+    z-index: 101;
+    opacity: 0;
+    transition: all 0.3s ease;
+    text-align: center;
+    pointer-events: none;
+  }
+  .sent-msg.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+</style>
+</head>
+<body>
+
+<div id="canvas-container">
+  <canvas id="drawCanvas"></canvas>
+  <div id="hint">شاركنا رأيك هنا...</div>
+</div>
+
+<div id="controls">
+  <button class="btn btn-clear" onclick="clearCanvas()">محو</button>
+  <button class="btn btn-done" onclick="sendToGallery()">تم</button>
+</div>
+
+<button id="fullscreen-btn" onclick="toggleFullscreen()" title="تكبير">
+  <svg id="fs-icon" viewBox="0 0 24 24">
+    <polyline points="15 3 21 3 21 9"/>
+    <polyline points="9 21 3 21 3 15"/>
+    <line x1="21" y1="3" x2="14" y2="10"/>
+    <line x1="3" y1="21" x2="10" y2="14"/>
+  </svg>
+</button>
+
+<div class="flash" id="flash"></div>
+<div class="sent-msg" id="sentMsg">شكرا على مشاركة رأيك</div>
+
+<script>
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  const hint = document.getElementById('hint');
+
+  let isDrawing = false;
+  let lastX = 0, lastY = 0;
+  let hasContent = false;
+
+function resizeCanvas() {
+  const container = document.getElementById('canvas-container');
+
+  const w = container.offsetWidth;
+  const h = container.offsetHeight;
+
+  const img = canvas.toDataURL();
+
+  canvas.width = w;
+  canvas.height = h;
+
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+
+  setupContext();
+
+  if (hasContent) {
+    const image = new Image();
+    image.onload = () => ctx.drawImage(image, 0, 0, w, h);
+    image.src = img;
+  }
+}
+
+  function setupContext() {
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2.5;
+    // Slight texture/pressure variation effect
+    ctx.shadowColor = 'rgba(10,10,30,0.15)';
+    ctx.shadowBlur = 1;
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * (canvas.width / rect.width),
+        y: (e.touches[0].clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+    return {
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  function startDraw(e) {
+  e.preventDefault();
+  isDrawing = true;
+
+  const pos = getPos(e);
+  lastX = pos.x;
+  lastY = pos.y;
+
+  ctx.beginPath(); // هنا فقط
+  ctx.moveTo(lastX, lastY);
+
+  if (!hasContent) {
+    hasContent = true;
+    hint.style.opacity = '0';
+  }
+  }
+
+  function draw(e) {
+  if (!isDrawing) return;
+  e.preventDefault();
+  const pos = getPos(e);
+
+  const dx = pos.x - lastX;
+  const dy = pos.y - lastY;
+  const speed = Math.sqrt(dx*dx + dy*dy);
+  const width = Math.max(1.2, Math.min(3.5, 3.5 - speed * 0.04));
+
+  ctx.lineWidth = width;
+
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+
+  lastX = pos.x;
+  lastY = pos.y;
+  }
+
+  function stopDraw(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    ctx.beginPath();
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDraw);
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasContent = false;
+    hint.style.opacity = '1';
+  }
+
+  function downloadImage(dataURL, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = dataURL;
+  link.click();
+}
+
+  function sendToGallery() {
+  if (!hasContent) return;
+
+  // Get image data as PNG
+  const imageData = canvas.toDataURL('image/png');
+
+  // Get existing entries
+  let entries = [];
+  try {
+    entries = JSON.parse(localStorage.getItem('gallery_entries') || '[]');
+  } catch(e) { entries = []; }
+
+  // Add new entry with timestamp
+  const newId = Date.now();
+  entries.push({
+    id: newId,
+    image: imageData,
+    timestamp: new Date().toLocaleString('ar-SA')
+  });
+
+  // Keep last 20 entries (يمكنك زيادة العدد أو إلغاء الحد)
+  if (entries.length > 20) entries = entries.slice(-20);
+
+  localStorage.setItem('gallery_entries', JSON.stringify(entries));
+
+  // إضافة: تنزيل الصورة على الجهاز
+  downloadImage(imageData, `vision_${newId}.png`);
+
+  // إظهار رسالة التأكيد
+  const flash = document.getElementById('flash');
+  const msg = document.getElementById('sentMsg');
+  flash.classList.add('show');
+  msg.classList.add('show');
+
+  setTimeout(() => {
+    flash.classList.remove('show');
+    msg.classList.remove('show');
+    clearCanvas();
+  }, 1800);
+}
+
+  function toggleFullscreen() {
+    const icon = document.getElementById('fs-icon');
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      icon.innerHTML = `
+        <polyline points="8 3 3 3 3 8"/>
+        <polyline points="21 8 21 3 16 3"/>
+        <line x1="3" y1="3" x2="10" y2="10"/>
+        <line x1="21" y1="3" x2="14" y2="10"/>
+      `;
+    } else {
+      document.exitFullscreen();
+      icon.innerHTML = `
+        <polyline points="15 3 21 3 21 9"/>
+        <polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/>
+        <line x1="3" y1="21" x2="10" y2="14"/>
+      `;
+    }
+  }
+</script>
+</body>
+</html>
