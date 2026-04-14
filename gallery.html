@@ -130,12 +130,6 @@
   }
   .btn-fs svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; }
 
-  #conn-status {
-    position: fixed; bottom: 18px; right: 18px; z-index: 20;
-    font-size: 12px; color: rgba(201,168,76,0.5);
-    display: flex; align-items: center; gap: 6px;
-  }
-
   @keyframes cardEnter {
     from { opacity: 0; transform: scale(0.5) rotate(-5deg); }
     to { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
@@ -189,10 +183,6 @@
   let knownFiles = new Set(); // ملفات نعرفها مسبقاً
   let isFirstLoad = true;
 
-  const pollDot   = document.getElementById('poll-dot');
-  const pollLabel = document.getElementById('poll-label');
-  const newNotif  = document.getElementById('new-notif');
-
   // جلب قائمة الملفات من GitHub
   async function fetchDrawings() {
     try {
@@ -208,7 +198,6 @@
 
       if (res.status === 404) {
         // المجلد مش موجود بعد — طبيعي قبل أول رسمة
-        pollDot.classList.add('live');
         isFirstLoad = false;
         return;
       }
@@ -216,7 +205,6 @@
       if (!res.ok) throw new Error('GitHub API error: ' + res.status);
 
       const files = await res.json();
-      pollDot.classList.add('live');
 
       // رتّب الملفات من الأقدم للأحدث
       const jpgFiles = files
