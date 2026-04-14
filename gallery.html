@@ -119,28 +119,6 @@
     border-radius: 30px; padding: 7px 20px;
     backdrop-filter: blur(8px);
   }
-  #poll-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #555; transition: background 0.3s;
-  }
-  #poll-dot.live { background: #4caf50; box-shadow: 0 0 8px #4caf5088; }
-  #poll-dot.error { background: #f44336; }
-  #poll-label { font-size: 13px; color: rgba(201,168,76,0.8); white-space: nowrap; }
-
-  /* إشعار صورة جديدة */
-  #new-notif {
-    position: fixed; top: 60px; left: 50%;
-    transform: translateX(-50%);
-    z-index: 30;
-    background: rgba(76,175,80,0.15);
-    border: 1.5px solid rgba(76,175,80,0.5);
-    border-radius: 20px; padding: 6px 18px;
-    font-size: 13px; color: #81c784;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.4s;
-    white-space: nowrap;
-  }
-  #new-notif.show { opacity: 1; }
 
   .btn-fs {
     position: fixed; bottom: 18px; left: 18px; z-index: 20;
@@ -186,24 +164,12 @@
   </div>
 </div>
 
-<!-- شريط الحالة -->
-<div id="top-bar">
-  <div id="poll-dot"></div>
-  <span id="poll-label">جاري التحميل...</span>
-</div>
-
-<!-- إشعار صورة جديدة -->
-<div id="new-notif">✦ وصلت رسمة جديدة!</div>
 
 <button class="btn-fs" onclick="toggleFS()">
   <svg id="fs-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
   </svg>
 </button>
-
-<div id="conn-status">
-  <span id="conn-label">يتحقق كل 5 ثواني</span>
-</div>
 
 <script>
   // ======================================================
