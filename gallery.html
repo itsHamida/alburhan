@@ -145,7 +145,6 @@
     border-radius: 20px;
   }
 
-  /* NEW badge for freshly arrived cards */
   .vision-card .card-new {
     position: absolute;
     top: 6px;
@@ -162,7 +161,7 @@
   @keyframes fadeOutBadge {
     0%   { opacity: 1; }
     70%  { opacity: 1; }
-    100% { opacity: 0; display: none; }
+    100% { opacity: 0; }
   }
 
   .btn-fs {
@@ -188,7 +187,6 @@
   }
   .btn-fs svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; }
 
-  /* Connection status */
   #conn-status {
     position: fixed;
     bottom: 18px;
@@ -209,6 +207,63 @@
   #conn-dot.live { background: #4caf50; box-shadow: 0 0 6px #4caf5088; }
   #conn-dot.error { background: #f44336; }
 
+  /* شريط التنزيل التلقائي */
+  #auto-dl-bar {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    background: rgba(13,27,42,0.95);
+    border: 1.5px solid rgba(76,175,80,0.6);
+    border-radius: 30px;
+    padding: 8px 22px;
+    font-size: 14px;
+    color: #81c784;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    backdrop-filter: blur(8px);
+    white-space: nowrap;
+  }
+  #auto-dl-bar.show { opacity: 1; }
+  #auto-dl-bar .dl-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #4caf50;
+    box-shadow: 0 0 8px #4caf50;
+  }
+
+  /* زر التنزيل التلقائي */
+  #auto-dl-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 30;
+    background: rgba(26,47,69,0.9);
+    border: 1.5px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 13px;
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  #auto-dl-toggle:hover {
+    border-color: rgba(201,168,76,0.7);
+    background: rgba(201,168,76,0.1);
+  }
+  #auto-dl-toggle.active {
+    background: rgba(76,175,80,0.15);
+    border-color: rgba(76,175,80,0.6);
+    color: #81c784;
+  }
+
   @keyframes cardEnter {
     from { opacity: 0; transform: scale(0.5) rotate(-5deg); }
     to { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
@@ -221,10 +276,7 @@
     100% { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 3; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
   }
 
-  /* Download button on hover */
-  .vision-card:hover .card-download {
-    opacity: 1;
-  }
+  .vision-card:hover .card-download { opacity: 1; }
   .card-download {
     position: absolute;
     bottom: 6px;
@@ -257,6 +309,15 @@
   </div>
 </div>
 
+<!-- زر تفعيل/إيقاف التنزيل التلقائي -->
+<button id="auto-dl-toggle" onclick="toggleAutoDl()">⬇ تنزيل تلقائي: إيقاف</button>
+
+<!-- إشعار التنزيل -->
+<div id="auto-dl-bar">
+  <div class="dl-dot"></div>
+  <span id="auto-dl-msg">جاري تنزيل الصورة...</span>
+</div>
+
 <button class="btn-fs" onclick="toggleFS()" title="تكبير الشاشة">
   <svg id="fs-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -273,9 +334,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // ======================================================
-  // 🔧 ضعي هنا نفس بيانات مشروع Firebase من index.html
-  // ======================================================
   const firebaseConfig = {
     apiKey: "AIzaSyBOAMlq9lmExCuTpYu0OKlp7ZDC3LtOFVk",
     authDomain: "alburhan-680f4.firebaseapp.com",
@@ -285,10 +343,14 @@
     messagingSenderId: "662754849270",
     appId: "1:662754849270:web:cbd3d76bb10994379ad7d7"
   };
-  // ======================================================
 
   const connDot = document.getElementById('conn-dot');
   const connLabel = document.getElementById('conn-label');
+
+  // نتجاهل الصور الموجودة مسبقاً، ننزل الجديدة فقط
+  let isInitialLoad = true;
+  let initialCount = 0;
+  let loadedCount = 0;
 
   try {
     const app = initializeApp(firebaseConfig);
@@ -298,12 +360,21 @@
     connDot.classList.add('live');
     connLabel.textContent = 'متصل — في انتظار الرسومات';
 
-    // يُستدعى فور وصول أي رسم جديد (سواء قديم أو جديد)
+    // أول دفعة = صور قديمة، لا ننزلها تلقائياً
+    // بعد ثانيتين نعتبر التحميل الأولي انتهى
+    setTimeout(() => { isInitialLoad = false; }, 2000);
+
     onChildAdded(galleryRef, (snapshot) => {
       const entry = snapshot.val();
       if (entry && entry.image) {
-        window._addCard(entry, true);
+        const isNew = !isInitialLoad;
+        window._addCard(entry, isNew);
         connLabel.textContent = `متصل • ${document.querySelectorAll('.vision-card').length} رسمة`;
+
+        // تنزيل تلقائي فقط للصور الجديدة (مش القديمة اللي محملة عند فتح الصفحة)
+        if (isNew) {
+          window._autoDownload(entry, document.querySelectorAll('.vision-card').length);
+        }
       }
     });
 
@@ -319,6 +390,41 @@
   let cardElements = [];
   let zoomInterval = null;
   let currentZoomIndex = 0;
+  let autoDlEnabled = false; // إيقاف بالافتراضي — المستخدم يفعّله
+
+  // تفعيل/إيقاف التنزيل التلقائي
+  window.toggleAutoDl = function() {
+    autoDlEnabled = !autoDlEnabled;
+    const btn = document.getElementById('auto-dl-toggle');
+    if (autoDlEnabled) {
+      btn.textContent = '⬇ تنزيل تلقائي: تشغيل';
+      btn.classList.add('active');
+    } else {
+      btn.textContent = '⬇ تنزيل تلقائي: إيقاف';
+      btn.classList.remove('active');
+    }
+  };
+
+  // تنزيل تلقائي عند وصول صورة جديدة
+  window._autoDownload = function(entry, num) {
+    if (!autoDlEnabled) return;
+
+    const bar = document.getElementById('auto-dl-bar');
+    const msg = document.getElementById('auto-dl-msg');
+    msg.textContent = `⬇ جاري تنزيل الصورة رقم ${num}...`;
+    bar.classList.add('show');
+
+    // تأخير بسيط لضمان وصول البيانات كاملة
+    setTimeout(() => {
+      const link = document.createElement('a');
+      link.download = `opinion_${num}_${Date.now()}.jpg`;
+      link.href = entry.image;
+      link.click();
+
+      msg.textContent = `✓ تم تنزيل الصورة رقم ${num}`;
+      setTimeout(() => bar.classList.remove('show'), 2500);
+    }, 500);
+  };
 
   function getStageRect() {
     const stage = document.getElementById('stage');
@@ -424,7 +530,6 @@
     }
   }
 
-  // الدالة الرئيسية — تُستدعى من Firebase listener
   window._addCard = function(entryData, isNew = true) {
     const stage = document.getElementById('stage');
     const idx = galleryEntries.length;
@@ -448,12 +553,11 @@
     startZoomCycle();
   };
 
-  // تنزيل صورة بطاقة محددة
   window.downloadCard = function(idx) {
     const entry = galleryEntries[idx];
     if (!entry) return;
     const link = document.createElement('a');
-    link.download = `opinion_${idx + 1}.png`;
+    link.download = `opinion_${idx + 1}.jpg`;
     link.href = entry.image;
     link.click();
   };
