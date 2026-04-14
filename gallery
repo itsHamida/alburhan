@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة الآراء</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #c9a84c;
+    --deep: #0d1b2a;
+    --mid: #1a2f45;
+    --light: #e8dfc8;
+  }
+
+  body {
+    font-family: 'Tajawal', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: radial-gradient(ellipse at bottom, #0d1b2a 0%, #020509 100%);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat;
+    opacity: 0.4;
+    z-index: 0;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(white 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: starsMove 60s linear infinite;
+    opacity: 0.15;
+    z-index: 0;
+  }
+
+  @keyframes starsMove {
+    from { transform: translateY(0); }
+    to { transform: translateY(-1000px); }
+  }
+
+  .header {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 40px 20px 14px;
+    flex-shrink: 0;
+  }
+
+  .title-main {
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-shadow: 0 0 30px rgba(201,168,76,0.3);
+    line-height: 1.3;
+  }
+
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 10px auto 0;
+    border-radius: 2px;
+  }
+
+  #stage {
+    flex: 1;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+    padding: 10px;
+  }
+
+  .empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(232,223,200,0.2);
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .empty-state.hidden { opacity: 0; }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  .empty-text {
+    font-size: 15px;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  .logo {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 80px;
+    z-index: 10;
+    background: #ffffff;
+    padding: 10px;
+    border-radius: 40%;
+    border: 2px solid rgba(201,168,76,0.5);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  .vision-card {
+    position: absolute;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    border: 1.5px solid rgba(201,168,76,0.2);
+    cursor: default;
+    transform-origin: center center;
+    transition: box-shadow 0.3s ease;
+    background: var(--mid);
+  }
+
+  .vision-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: #f5f0e8;
+  }
+
+  .vision-card .card-num {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: rgba(201,168,76,0.9);
+    color: var(--deep);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .btn-fs {
+    position: fixed;
+    bottom: 18px;
+    left: 18px;
+    z-index: 20;
+    background: rgba(26,47,69,0.9);
+    border: 1.5px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .btn-fs:hover {
+    background: rgba(201,168,76,0.15);
+    border-color: rgba(201,168,76,0.6);
+  }
+  .btn-fs svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; }
+
+  @keyframes cardEnter {
+    from { opacity: 0; transform: scale(0.5) rotate(-5deg); }
+    to { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
+  }
+
+  @keyframes zoomPulse {
+  0%   { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+  40%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
+  70%  { transform: scale(2.2) rotate(var(--rot, 0deg)); z-index: 10; box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 3px rgba(201,168,76,0.8); }
+  100% { transform: scale(1) rotate(var(--rot, 0deg)); z-index: 3; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+}
+</style>
+</head>
+<body>
+<img src="logo.png" class="logo" alt="شعار">
+<div class="header">
+  <div class="title-main">رؤية تتحقق بخطوات واثقة</div>
+  <div class="divider"></div>
+</div>
+
+<div id="stage">
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">✦</div>
+    <div class="empty-text">في انتظار رؤيتك...</div>
+  </div>
+</div>
+
+<button class="btn-fs" onclick="toggleFS()" title="تكبير الشاشة">
+  <svg id="fs-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+  </svg>
+</button>
+
+<script>
+  // ---------- المتغيرات العامة ----------
+  let galleryEntries = [];      // مصفوفة الكائنات { id, image, timestamp }
+  let cardElements = [];        // عناصر DOM للبطاقات (بنفس الترتيب)
+  let zoomInterval = null;
+  let currentZoomIndex = 0;
+  let knownIds = new Set();     // لتتبع المعرفات الموجودة حالياً
+
+  // ---------- دوال التوزيع (Layout) ----------
+  function getStageRect() {
+    const stage = document.getElementById('stage');
+    return { w: stage.offsetWidth, h: stage.offsetHeight };
+  }
+
+  // حساب أحجام البطاقات بناءً على العدد (تكيف تلقائي)
+  function getCardSizeRange(n) {
+    let maxW, maxH, minW, minH;
+    if (n <= 30) {
+      maxW = 240; maxH = 180;
+      minW = 120; minH = 90;
+    } else if (n <= 70) {
+      maxW = 180; maxH = 135;
+      minW = 100; minH = 75;
+    } else {
+      maxW = 140; maxH = 105;
+      minW = 80;  minH = 60;
+    }
+    // ألا يتجاوز 40% من عرض/ارتفاع المرحلة
+    const { w, h } = getStageRect();
+    maxW = Math.min(maxW, w * 0.35);
+    maxH = Math.min(maxH, h * 0.35);
+    minW = Math.min(minW, w * 0.12);
+    minH = Math.min(minH, h * 0.12);
+    return { minW, maxW, minH, maxH };
+  }
+
+  // توليد مواقع غير متداخلة لـ n بطاقة
+  function computeLayout(n) {
+  const { w, h } = getStageRect();
+  const padding = 15; // مسافة أمان من الحواف
+  const topSafeZone = Math.max(80, h * 0.18);
+  
+  if (n === 0) return [];
+
+  // حالة بطاقة واحدة
+  if (n === 1) {
+    const { maxW, maxH } = getCardSizeRange(1);
+    const cw = Math.min(w * 0.5, maxW);
+    const ch = Math.min(h * 0.5, maxH);
+    let x = (w - cw) / 2;
+    let y = (h - ch) / 2 + topSafeZone / 2;
+    x = Math.min(w - cw - padding, Math.max(padding, x));
+    y = Math.min(h - ch - padding, Math.max(topSafeZone, y));
+    return [{ x, y, w: cw, h: ch, rot: 0 }];
+  }
+
+  const { minW, maxW, minH, maxH } = getCardSizeRange(n);
+  const layouts = [];
+  const maxAttempts = n * 150;
+  let attempts = 0;
+
+  while (layouts.length < n && attempts < maxAttempts) {
+    attempts++;
+    const cw = minW + Math.random() * (maxW - minW);
+    const ch = minH + Math.random() * (maxH - minH);
+    const rot = (Math.random() - 0.5) * 8;
+
+    // تحديد منطقة أفقية (يسار، وسط، يمين)
+    const zone = Math.random();
+    let x, y;
+
+    // أقصى يسار مسموح به
+    const minX = padding;
+    const maxX = w - cw - padding;
+    const minY = topSafeZone;
+    const maxY = h - ch - padding;
+
+    if (zone < 0.33) { // المنطقة اليسرى
+      // المدى: من padding إلى 30% عرض الشاشة
+      const leftMax = Math.min(maxX, w * 0.3);
+      x = minX + Math.random() * (leftMax - minX);
+    } 
+    else if (zone < 0.66) { // المنطقة الوسطى
+      const centerStart = w * 0.35;
+      const centerEnd = w * 0.65;
+      x = Math.max(minX, Math.min(maxX, centerStart + Math.random() * (centerEnd - centerStart)));
+    } 
+    else { // المنطقة اليمنى
+      const rightStart = Math.max(minX, w * 0.7);
+      x = rightStart + Math.random() * (maxX - rightStart);
+    }
+
+    // تأمين نهائي لـ x
+    x = Math.min(maxX, Math.max(minX, x));
+
+    // y عشوائي ضمن النطاق المسموح
+    y = minY + Math.random() * (maxY - minY);
+    y = Math.min(maxY, Math.max(minY, y));
+
+    // فحص التداخل (أقل من 2% مساحة متداخلة)
+    let overlap = false;
+    for (const l of layouts) {
+      const ix = Math.max(x, l.x);
+      const iy = Math.max(y, l.y);
+      const iw = Math.min(x + cw, l.x + l.w) - ix;
+      const ih = Math.min(y + ch, l.y + l.h) - iy;
+      if (iw > 0 && ih > 0) {
+        const overlapArea = iw * ih;
+        const areaThis = cw * ch;
+        if (overlapArea / areaThis > 0.02) {
+          overlap = true;
+          break;
+        }
+      }
+    }
+    if (!overlap) {
+      layouts.push({ x, y, w: cw, h: ch, rot });
+    }
+  }
+
+  // حشو البطاقات المتبقية (fallback) مع حدود صارمة جداً
+  while (layouts.length < n) {
+    const cw = minW + Math.random() * (maxW - minW);
+    const ch = minH + Math.random() * (maxH - minH);
+    const rot = (Math.random() - 0.5) * 8;
+    let x = padding + Math.random() * (w - cw - 2 * padding);
+    let y = topSafeZone + Math.random() * (h - ch - topSafeZone);
+    x = Math.min(w - cw - padding, Math.max(padding, x));
+    y = Math.min(h - ch - padding, Math.max(topSafeZone, y));
+    layouts.push({ x, y, w: cw, h: ch, rot });
+  }
+  return layouts;
+}
+
+  // تطبيق التوزيع على جميع البطاقات الموجودة (بدون إضافة/حذف)
+  function applyLayoutToAll(animateLast = false) {
+    if (galleryEntries.length === 0) return;
+    const layouts = computeLayout(galleryEntries.length);
+    for (let i = 0; i < cardElements.length; i++) {
+      const el = cardElements[i];
+      const l = layouts[i];
+      if (!el || !l) continue;
+      el.style.setProperty('--rot', `${l.rot}deg`);
+      el.style.left = l.x + 'px';
+      el.style.top = l.y + 'px';
+      el.style.width = l.w + 'px';
+      el.style.height = l.h + 'px';
+      if (animateLast && i === cardElements.length - 1) {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = `cardEnter 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards`;
+      } else {
+        el.style.transform = `rotate(${l.rot}deg)`;
+      }
+    }
+  }
+
+  // ---------- إدارة البطاقات (إضافة فردية) ----------
+  function addOneCard(entryData, isNew = true) {
+    const stage = document.getElementById('stage');
+    const idx = galleryEntries.length; // الرقم التسلسلي الجديد
+
+    const card = document.createElement('div');
+    card.className = 'vision-card';
+    card.style.position = 'absolute';
+    card.style.zIndex = 3;
+    card.innerHTML = `
+      <img src="${entryData.image}" alt="رؤية ${idx+1}">
+      <div class="card-num">${idx+1}</div>
+    `;
+    stage.appendChild(card);
+    cardElements.push(card);
+    galleryEntries.push(entryData);
+    knownIds.add(entryData.id);
+
+    // إخفاء الرسالة الفارغة
+    document.getElementById('emptyState').classList.add('hidden');
+
+    // إعادة توزيع جميع البطاقات (بما فيها الجديدة) للحصول على ترتيب مثالي
+    applyLayoutToAll(isNew);
+
+    // إعادة تشغيل دورة التكبير (لأن العدد تغير)
+    startZoomCycle();
+  }
+
+  // ---------- مزامنة مع localStorage ----------
+  function syncWithStorage() {
+    let stored = [];
+    try {
+      const raw = localStorage.getItem('gallery_entries');
+      if (raw) stored = JSON.parse(raw);
+    } catch(e) { stored = []; }
+
+    // إضافة أي بطاقات جديدة غير موجودة حالياً
+    let added = false;
+    for (const entry of stored) {
+      if (!knownIds.has(entry.id)) {
+        addOneCard(entry, true);
+        added = true;
+      }
+    }
+
+    // (اختياري) إذا أردت حذف البطاقات التي لم تعد موجودة في المخزن – لا نفعله تلقائياً
+    // حتى لا تختفي البطاقات عند مسح localStorage يدوياً.
+
+    // إذا لم تكن هناك أي بطاقات وعرضنا الرسالة
+    if (galleryEntries.length === 0) {
+      document.getElementById('emptyState').classList.remove('hidden');
+      if (zoomInterval) clearInterval(zoomInterval);
+    } else if (added) {
+      // تمت إضافة بطاقات جديدة، تم بالفعل استدعاء startZoomCycle داخل addOneCard
+    }
+  }
+
+  // ---------- دورة التكبير التلقائي ----------
+  function startZoomCycle() {
+    if (zoomInterval) clearInterval(zoomInterval);
+    if (galleryEntries.length === 0) return;
+    currentZoomIndex = 0;
+    doZoom();
+    zoomInterval = setInterval(() => {
+      if (galleryEntries.length === 0) {
+        clearInterval(zoomInterval);
+        return;
+      }
+      currentZoomIndex = (currentZoomIndex + 1) % galleryEntries.length;
+      doZoom();
+    }, 3500);
+  }
+
+  function doZoom() {
+    if (cardElements.length === 0) return;
+    const el = cardElements[currentZoomIndex];
+    if (!el) return;
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = 'zoomPulse 3s ease-in-out forwards';
+    el.style.zIndex = 10;
+    setTimeout(() => {
+      if (el) el.style.zIndex = 3;
+    }, 3000);
+  }
+
+  // ---------- أحداث إضافية ----------
+  function toggleFS() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      document.getElementById('fs-icon').innerHTML = `<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>`;
+    } else {
+      document.exitFullscreen();
+      document.getElementById('fs-icon').innerHTML = `<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>`;
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    if (galleryEntries.length > 0) {
+      // إعادة التوزيع عند تغيير حجم الشاشة
+      applyLayoutToAll(false);
+    }
+  });
+
+  // بدء المراقبة
+  setInterval(syncWithStorage, 800);
+  syncWithStorage(); // التحميل الأولي
+</script>
+</body>
+</html>
